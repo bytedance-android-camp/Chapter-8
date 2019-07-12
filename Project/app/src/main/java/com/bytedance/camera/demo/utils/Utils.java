@@ -1,7 +1,9 @@
 package com.bytedance.camera.demo.utils;
 
+import android.app.Activity;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
@@ -10,12 +12,16 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
 import android.provider.MediaStore;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.text.TextUtils;
 
 import java.io.File;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 public class Utils {
 
@@ -37,7 +43,7 @@ public class Utils {
             return uri.toString();
         }
         if (ContentResolver.SCHEME_CONTENT.equals(schema)) {
-            String[] projection = new String[]{MediaStore.MediaColumns.DATA};
+            String[] projection = new String[] {MediaStore.MediaColumns.DATA};
             Cursor cursor = null;
             String filePath = "";
             try {
@@ -67,8 +73,9 @@ public class Utils {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT && !TextUtils.isEmpty(id) && id.contains(":")) {
                         id = id.split(":")[1];
                     }
-                    String[] selectionArgs = new String[]{id};
-                    cursor = contentResolver.query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, projection, selection, selectionArgs, null);
+                    String[] selectionArgs = new String[] {id};
+                    cursor = contentResolver
+                            .query(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, projection, selection, selectionArgs, null);
                     if (cursor.moveToFirst()) {
                         filePath = cursor.getString(0);
                     }
@@ -130,7 +137,7 @@ public class Utils {
     private static final int NUM_180 = 180;
     private static final int NUM_270 = 270;
 
-    public static  Bitmap rotateImage(Bitmap bitmap, String path) {
+    public static Bitmap rotateImage(Bitmap bitmap, String path) {
         ExifInterface srcExif = null;
         try {
             srcExif = new ExifInterface(path);
@@ -156,5 +163,33 @@ public class Utils {
         }
         matrix.postRotate(angle);
         return Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
+    }
+
+    public static boolean isPermissionsReady(Activity activity, String[] permissions) {
+        if (permissions == null || android.os.Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+            return true;
+        }
+        for (int i = 0; i < permissions.length; i++) {
+            if (ContextCompat.checkSelfPermission(activity, permissions[i]) != PackageManager.PERMISSION_GRANTED) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    public static void reuqestPermissions(Activity activity, String[] permissions, int requestCode) {
+        if (permissions == null || android.os.Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+            return;
+        }
+        List<String> mPermissionList = new ArrayList<>();
+        for (int i = 0; i < permissions.length; i++) {
+            if (ContextCompat.checkSelfPermission(activity, permissions[i]) != PackageManager.PERMISSION_GRANTED) {
+                mPermissionList.add(permissions[i]);//添加还未授予的权限
+            }
+        }
+        if (mPermissionList.size() > 0) {//有权限没有通过，需要申请
+            ActivityCompat.requestPermissions(activity, permissions, requestCode);
+        }
     }
 }

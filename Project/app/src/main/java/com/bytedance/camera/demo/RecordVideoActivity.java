@@ -1,13 +1,14 @@
 package com.bytedance.camera.demo;
 
-import android.Manifest;
 import android.content.Intent;
-import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.support.annotation.NonNull;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.VideoView;
+
+import com.bytedance.camera.demo.utils.Utils;
 
 public class RecordVideoActivity extends AppCompatActivity {
 
@@ -15,19 +16,23 @@ public class RecordVideoActivity extends AppCompatActivity {
     private static final int REQUEST_VIDEO_CAPTURE = 1;
 
     private static final int REQUEST_EXTERNAL_CAMERA = 101;
+    String[] permissions = new String[] {
+
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_record_video);
-
         videoView = findViewById(R.id.img);
         findViewById(R.id.btn_picture).setOnClickListener(v -> {
-            if (ContextCompat.checkSelfPermission(RecordVideoActivity.this,
-                    Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-                //todo 在这里申请相机、存储的权限
+
+            if (Utils.isPermissionsReady(this, permissions)) {
+                //todo 打开摄像机
+                openVideoRecordApp();
             } else {
-                //todo 打开相机拍摄
+                //todo 权限检查
+                Utils.reuqestPermissions(this, permissions, REQUEST_EXTERNAL_CAMERA);
             }
         });
 
@@ -38,6 +43,9 @@ public class RecordVideoActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, intent);
         if (requestCode == REQUEST_VIDEO_CAPTURE && resultCode == RESULT_OK) {
             //todo 播放刚才录制的视频
+            Uri videoUri = intent.getData();
+            videoView.setVideoURI(videoUri);
+            videoView.start();
         }
     }
 
@@ -47,8 +55,19 @@ public class RecordVideoActivity extends AppCompatActivity {
         switch (requestCode) {
             case REQUEST_EXTERNAL_CAMERA: {
                 //todo 判断权限是否已经授予
+                if (Utils.isPermissionsReady(this, permissions)) {
+                    //todo 打开摄像机
+                    openVideoRecordApp();
+                }
                 break;
             }
+        }
+    }
+
+    private void openVideoRecordApp() {
+        Intent intent = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
+        if (intent.resolveActivity(getPackageManager()) != null) {
+            startActivityForResult(intent, REQUEST_VIDEO_CAPTURE);
         }
     }
 }
