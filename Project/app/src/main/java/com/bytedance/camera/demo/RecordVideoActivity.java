@@ -1,9 +1,7 @@
 package com.bytedance.camera.demo;
 
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
-import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.VideoView;
@@ -43,9 +41,7 @@ public class RecordVideoActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, intent);
         if (requestCode == REQUEST_VIDEO_CAPTURE && resultCode == RESULT_OK) {
             //todo 播放刚才录制的视频
-            Uri videoUri = intent.getData();
-            videoView.setVideoURI(videoUri);
-            videoView.start();
+
         }
     }
 
@@ -65,9 +61,6 @@ public class RecordVideoActivity extends AppCompatActivity {
     }
 
     private void openVideoRecordApp() {
-        Intent intent = new Intent(MediaStore.ACTION_VIDEO_CAPTURE);
-        if (intent.resolveActivity(getPackageManager()) != null) {
-            startActivityForResult(intent, REQUEST_VIDEO_CAPTURE);
-        }
+
     }
 }

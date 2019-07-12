@@ -50,21 +50,16 @@ public class TakePictureActivity extends AppCompatActivity {
         }
     }
 
-    private void setPicByBitmap() {
+    private void setPic() {
         //todo 根据imageView裁剪
         //todo 根据缩放比例读取文件，生成Bitmap
 
         //todo 如果存在预览方向改变，进行图片旋转
 
         //todo 如果存在预览方向改变，进行图片旋转
-    }
-
-
-
-    private void setPicByPath(Bitmap bitmap) {
         //todo 显示图片
-        imageView.setImageBitmap(bitmap);
     }
+
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         switch (requestCode) {
